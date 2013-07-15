@@ -4,7 +4,9 @@ window.App={}
 App.atualizarGUI = (page) ->
   page.trigger('create')
 
+
 class App.Pagina
+
   constructor: (@modulo, @idMae) ->
     body  = $("body")
     @page = $('<div data-role="page" data-theme="a" id="' + this.getId() + '">"')
@@ -60,7 +62,9 @@ class App.Pagina
     request.always =>
         callback()
   
+
 class App.PaginaListagem extends App.Pagina
+
   constructor: (@modulo, @idMae) ->
     super(@modulo, @idMae)
 
@@ -79,7 +83,7 @@ class App.PaginaListagem extends App.Pagina
       @lista.listview('refresh')
     
   listar: (registro) ->
-    ver = $("<a href='#'>#{registro[@modulo.propriedade]}</a>")
+    ver = $("<a href='#" + @modulo.paginaDetalhes.getId() + "' data-transition='slide'>#{registro[@modulo.propriedade]}</a>")
     editar = $("<a href='#" + @modulo.paginaEdicao.getId() + "' data-transition='slide'>Editar</a>")
     li = $("<li data-theme='c' data-icon='edit'>")
     li.append ver
@@ -88,14 +92,40 @@ class App.PaginaListagem extends App.Pagina
     ver.click =>
       @modulo.abrirItem(registro.id)
     editar.click =>
-      @modulo.editarItem(registro.id)
-
+      @modulo.editarItem(registro.id, registro.version)
 
   desenharBotaoNovo: ->
     criar = $('<a data-role="button" data-inline="true" href="#criacao' + @modulo.url + '" data-icon="create" data-iconpos="left">Criar</a>')
     @content.append criar
     criar.click =>
       @modulo.novoItem()
+
+
+class App.PaginaDetalhes extends App.Pagina
+
+  constructor: (@modulo, @idMae) ->
+    super(@modulo, @idMae)
+
+  getId: ->
+    "detalhes" + @modulo.url
+
+  abrir: (@idItem) ->
+    this.desenharConteudo()    
+    $.getJSON @modulo.url + "/" + @idItem, (jsonObj) =>
+      this.carregar(jsonObj)
+      this.atualizar()
+
+  desenharConteudo: ->
+    @content.empty()
+    @titulo = $("<div>#{@modulo.nome} </div>")
+    @content.append @titulo
+    
+    @desenharBotaoVoltar()
+    @atualizar()
+
+  carregar: (registro) ->
+    @titulo.html "#{@modulo.nome} #{registro[@modulo.propriedade]}"
+
 
 class App.PaginaEdicao extends App.Pagina
   constructor: (@modulo) ->
@@ -110,7 +140,7 @@ class App.PaginaEdicao extends App.Pagina
   desenharConteudo: ->
     @form.empty()    
     
-  abrir: (@idItem) ->
+  abrir: (@idItem, @versionItem) ->
     this.desenharConteudo()    
     $.getJSON @modulo.url + "/" + @idItem, (jsonObj) =>
       this.desenharConteudoForm(jsonObj)
@@ -128,13 +158,15 @@ class App.PaginaEdicao extends App.Pagina
     
   salvar: =>
     json = this.montarJSON()        
-    this.enviarPut @modulo.url + "/" + @idItem, json, =>
+    this.enviarPut @modulo.url, json, =>
         @modulo.abrir()
         
   montarJSON: ->
     "{}"   
 
+
 class App.PaginaCriacao extends App.Pagina
+
   constructor: (@modulo) ->
     super(@modulo, @modulo.paginaListagem.getId())
     @form = $('<form>')
@@ -171,18 +203,22 @@ class App.PaginaCriacao extends App.Pagina
     "{}"   
 
 
-    
 class App.Modulo
+
   constructor: (@lista, @nome, @url, @propriedade) ->
     @paginaListagem = new App.PaginaListagem(this, "principal")
     @paginaEdicao = @criarPaginaEdicao()
     @paginaCriacao = @criarPaginaCriacao()
+    @paginaDetalhes = @criarPaginaDetalhes()
   
   criarPaginaEdicao: ->
-    new App.PaginaEdicao(this)
+    new App.PaginaEdicao(this, @paginaListagem.getId())
 
   criarPaginaCriacao: ->
-    new App.PaginaCriacao(this)
+    new App.PaginaCriacao(this, @paginaListagem.getId())
+
+  criarPaginaDetalhes: ->
+    new App.PaginaDetalhes(this, @paginaListagem.getId())
     
   abrir: ->
     @paginaListagem.desenharConteudo()
@@ -191,8 +227,8 @@ class App.Modulo
     @paginaCriacao.abrir()
       
   abrirItem: (idItem) ->
-    alert "ver " + idItem
+    @paginaDetalhes.abrir(idItem)
   
-  editarItem: (idItem) ->
-    @paginaEdicao.abrir(idItem)
+  editarItem: (idItem, versionItem) ->
+    @paginaEdicao.abrir(idItem, versionItem)
 

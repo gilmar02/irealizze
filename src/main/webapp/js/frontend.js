@@ -119,7 +119,7 @@
     PaginaListagem.prototype.listar = function(registro) {
       var editar, li, ver,
         _this = this;
-      ver = $("<a href='#'>" + registro[this.modulo.propriedade] + "</a>");
+      ver = $("<a href='#" + this.modulo.paginaDetalhes.getId() + ("' data-transition='slide'>" + registro[this.modulo.propriedade] + "</a>"));
       editar = $("<a href='#" + this.modulo.paginaEdicao.getId() + "' data-transition='slide'>Editar</a>");
       li = $("<li data-theme='c' data-icon='edit'>");
       li.append(ver);
@@ -129,7 +129,7 @@
         return _this.modulo.abrirItem(registro.id);
       });
       return editar.click(function() {
-        return _this.modulo.editarItem(registro.id);
+        return _this.modulo.editarItem(registro.id, registro.version);
       });
     };
 
@@ -144,6 +144,46 @@
     };
 
     return PaginaListagem;
+
+  })(App.Pagina);
+
+  App.PaginaDetalhes = (function(_super) {
+
+    __extends(PaginaDetalhes, _super);
+
+    function PaginaDetalhes(modulo, idMae) {
+      this.modulo = modulo;
+      this.idMae = idMae;
+      PaginaDetalhes.__super__.constructor.call(this, this.modulo, this.idMae);
+    }
+
+    PaginaDetalhes.prototype.getId = function() {
+      return "detalhes" + this.modulo.url;
+    };
+
+    PaginaDetalhes.prototype.abrir = function(idItem) {
+      var _this = this;
+      this.idItem = idItem;
+      this.desenharConteudo();
+      return $.getJSON(this.modulo.url + "/" + this.idItem, function(jsonObj) {
+        _this.carregar(jsonObj);
+        return _this.atualizar();
+      });
+    };
+
+    PaginaDetalhes.prototype.desenharConteudo = function() {
+      this.content.empty();
+      this.titulo = $("<div>" + this.modulo.nome + " </div>");
+      this.content.append(this.titulo);
+      this.desenharBotaoVoltar();
+      return this.atualizar();
+    };
+
+    PaginaDetalhes.prototype.carregar = function(registro) {
+      return this.titulo.html("" + this.modulo.nome + " " + registro[this.modulo.propriedade]);
+    };
+
+    return PaginaDetalhes;
 
   })(App.Pagina);
 
@@ -169,9 +209,10 @@
       return this.form.empty();
     };
 
-    PaginaEdicao.prototype.abrir = function(idItem) {
+    PaginaEdicao.prototype.abrir = function(idItem, versionItem) {
       var _this = this;
       this.idItem = idItem;
+      this.versionItem = versionItem;
       this.desenharConteudo();
       return $.getJSON(this.modulo.url + "/" + this.idItem, function(jsonObj) {
         _this.desenharConteudoForm(jsonObj);
@@ -196,7 +237,7 @@
       var json,
         _this = this;
       json = this.montarJSON();
-      return this.enviarPut(this.modulo.url + "/" + this.idItem, json, function() {
+      return this.enviarPut(this.modulo.url, json, function() {
         return _this.modulo.abrir();
       });
     };
@@ -277,14 +318,19 @@
       this.paginaListagem = new App.PaginaListagem(this, "principal");
       this.paginaEdicao = this.criarPaginaEdicao();
       this.paginaCriacao = this.criarPaginaCriacao();
+      this.paginaDetalhes = this.criarPaginaDetalhes();
     }
 
     Modulo.prototype.criarPaginaEdicao = function() {
-      return new App.PaginaEdicao(this);
+      return new App.PaginaEdicao(this, this.paginaListagem.getId());
     };
 
     Modulo.prototype.criarPaginaCriacao = function() {
-      return new App.PaginaCriacao(this);
+      return new App.PaginaCriacao(this, this.paginaListagem.getId());
+    };
+
+    Modulo.prototype.criarPaginaDetalhes = function() {
+      return new App.PaginaDetalhes(this, this.paginaListagem.getId());
     };
 
     Modulo.prototype.abrir = function() {
@@ -296,11 +342,11 @@
     };
 
     Modulo.prototype.abrirItem = function(idItem) {
-      return alert("ver " + idItem);
+      return this.paginaDetalhes.abrir(idItem);
     };
 
-    Modulo.prototype.editarItem = function(idItem) {
-      return this.paginaEdicao.abrir(idItem);
+    Modulo.prototype.editarItem = function(idItem, versionItem) {
+      return this.paginaEdicao.abrir(idItem, versionItem);
     };
 
     return Modulo;
