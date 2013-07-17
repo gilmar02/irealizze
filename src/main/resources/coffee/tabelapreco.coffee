@@ -11,9 +11,17 @@ class App.FormEdicaoTabelaPreco extends App.PaginaEdicao
                 
     divNome.append labelNome
     divNome.append @inputNome
+    
+    divPrecos = $('<div data-role="fieldcontain">')
+    @form.append divPrecos    
+    labelPrecos = $('<label for="precos">Preço</label>')        
+    @inputPrecos = $('<input precos="precos" id="precos" placeholder="" value="' + jsonObj.precos + '" type="numbers">')
+                
+    divPrecos.append labelPrecos
+    divPrecos.append @inputPrecos
 
     montarJSON: ->
-    "{ 'nome': '#{@inputNome.val()}' }"         
+    "{ 'nome': '#{@inputNome.val()}' , 'precos': '#{@inputPrecos.val()}' }"         
     
 class App.FormCriacaoTabelaPreco extends App.PaginaCriacao
   constructor: (@modulo) ->
@@ -27,11 +35,17 @@ class App.FormCriacaoTabelaPreco extends App.PaginaCriacao
                 
     divNome.append labelNome
     divNome.append @inputNome
-
+    
+    divPrecos = $('<div data-role="fieldcontain">')
+    @form.append divPrecos   
+    labelPrecos = $('<label for="precos">Preço</label>')        
+    @inputPrecos = $('<input name="precos" id="precos" placeholder="" value="" type="numbers">')
+                
+    divPrecos.append labelPrecos
+    divPrecos.append @inputPrecos
 
    montarJSON: ->
-    "{ 'nome': '#{@inputNome.val()}' }"                
-
+    "{ 'nome': '#{@inputNome.val()}' , 'precos': '#{@inputPrecos.val() }'}"                
 
 
 

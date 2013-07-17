@@ -180,7 +180,7 @@
     };
 
     PaginaDetalhes.prototype.carregar = function(registro) {
-      return this.titulo.html("" + this.modulo.nome + " " + registro[this.modulo.propriedade]);
+      return alert("1");
     };
 
     return PaginaDetalhes;

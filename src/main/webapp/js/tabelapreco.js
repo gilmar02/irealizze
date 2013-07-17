@@ -12,17 +12,23 @@
     }
 
     FormEdicaoTabelaPreco.prototype.desenharConteudoForm = function(jsonObj) {
-      var divNome, labelNome;
+      var divNome, divPrecos, labelNome, labelPrecos;
       divNome = $('<div data-role="fieldcontain">');
       this.form.append(divNome);
       labelNome = $('<label for="nome">Nome</label>');
       this.inputNome = $('<input name="nome" id="nome" placeholder="" value="' + jsonObj.nome + '" type="text">');
       divNome.append(labelNome);
       divNome.append(this.inputNome);
+      divPrecos = $('<div data-role="fieldcontain">');
+      this.form.append(divPrecos);
+      labelPrecos = $('<label for="precos">Preço</label>');
+      this.inputPrecos = $('<input precos="precos" id="precos" placeholder="" value="' + jsonObj.precos + '" type="numbers">');
+      divPrecos.append(labelPrecos);
+      divPrecos.append(this.inputPrecos);
       ({
         montarJSON: function() {}
       });
-      return "{ 'nome': '" + (this.inputNome.val()) + "' }";
+      return "{ 'nome': '" + (this.inputNome.val()) + "' , 'precos': '" + (this.inputPrecos.val()) + "' }";
     };
 
     return FormEdicaoTabelaPreco;
@@ -39,17 +45,23 @@
     }
 
     FormCriacaoTabelaPreco.prototype.desenharConteudoForm = function() {
-      var divNome, labelNome;
+      var divNome, divPrecos, labelNome, labelPrecos;
       divNome = $('<div data-role="fieldcontain">');
       this.form.append(divNome);
       labelNome = $('<label for="nome">Nome</label>');
       this.inputNome = $('<input name="nome" id="nome" placeholder="" value="" type="text">');
       divNome.append(labelNome);
-      return divNome.append(this.inputNome);
+      divNome.append(this.inputNome);
+      divPrecos = $('<div data-role="fieldcontain">');
+      this.form.append(divPrecos);
+      labelPrecos = $('<label for="precos">Preço</label>');
+      this.inputPrecos = $('<input name="precos" id="precos" placeholder="" value="" type="numbers">');
+      divPrecos.append(labelPrecos);
+      return divPrecos.append(this.inputPrecos);
     };
 
     FormCriacaoTabelaPreco.prototype.montarJSON = function() {
-      return "{ 'nome': '" + (this.inputNome.val()) + "' }";
+      return "{ 'nome': '" + (this.inputNome.val()) + "' , 'precos': '" + (this.inputPrecos.val()) + "'}";
     };
 
     return FormCriacaoTabelaPreco;

@@ -30,10 +30,29 @@ class App.FormCriacaoTipoItem extends App.PaginaCriacao
 
 
    montarJSON: ->
-    "{ 'nome': '#{@inputNome.val()}' }"                
+    "{ 'nome': '#{@inputNome.val()}' }"    
+    
+class App.PaginaDetalhesTipoItem extends App.PaginaDetalhes
+  constructor:(@modulo)->
+     super(@modulo)
+     
+  carregar: (registro) ->
+    @titulo.html "#{@modulo.nome} #{registro[@modulo.propriedade]}"
+    divNome = $('<div data-role="fieldcontain">')
+    @form.append divNome    
+    labelNome = $('<label for="nome">Nome</label>')        
+    @inputNome = $('<input name="nome" id="nome" placeholder="" value="" type="text">')
+                
+    divNome.append labelNome
+    divNome.append @inputNome
+    
+     montarJSON: ->
+    "{ 'nome do item', 'nome': '#{@inputNome.val()}' }"    
 
 
-
+       
+     
+                
 
 class App.ModuloTipoItem extends App.Modulo
   constructor: (@lista) ->
@@ -42,4 +61,8 @@ class App.ModuloTipoItem extends App.Modulo
   criarPaginaEdicao: ->
     new App.FormEdicaoTipoItem(this)
   criarPaginaCriacao: ->
-    new App.FormCriacaoTipoItem(this)   
+    new App.FormCriacaoTipoItem(this)  
+  criarPaginaDetalhes: ->  
+    new App.PaginaDetalhesTipoItem(this)
+
+  

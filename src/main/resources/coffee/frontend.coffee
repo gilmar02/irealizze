@@ -110,10 +110,10 @@ class App.PaginaDetalhes extends App.Pagina
     "detalhes" + @modulo.url
 
   abrir: (@idItem) ->
-    this.desenharConteudo()    
+    this.desenharConteudo()   
     $.getJSON @modulo.url + "/" + @idItem, (jsonObj) =>
-      this.carregar(jsonObj)
-      this.atualizar()
+      @carregar(jsonObj)
+      @atualizar()
 
   desenharConteudo: ->
     @content.empty()
@@ -124,8 +124,7 @@ class App.PaginaDetalhes extends App.Pagina
     @atualizar()
 
   carregar: (registro) ->
-    @titulo.html "#{@modulo.nome} #{registro[@modulo.propriedade]}"
-
+    alert("1")
 
 class App.PaginaEdicao extends App.Pagina
   constructor: (@modulo) ->
