@@ -68,6 +68,44 @@
 
   })(App.PaginaCriacao);
 
+  App.PaginaDetalhesTabelaPreco = (function(_super) {
+
+    __extends(PaginaDetalhesTabelaPreco, _super);
+
+    function PaginaDetalhesTabelaPreco(modulo) {
+      this.modulo = modulo;
+      PaginaDetalhesTabelaPreco.__super__.constructor.call(this, this.modulo);
+    }
+
+    PaginaDetalhesTabelaPreco.prototype.carregar = function(registro) {
+      var grid,
+        _this = this;
+      this.titulo.html("" + registro[this.modulo.propriedade]);
+      grid = $('<div class="ui-grid-a">');
+      this.content.append(grid);
+      $.getJSON('itens', function(jsonObj) {
+        return $.each(jsonObj, function(i, item) {
+          var divprecoitem, divsegcol, inputprecoitem, nomeitem;
+          nomeitem = $('<div class="ui-block-a">' + item.nome + '</div>');
+          grid.append(nomeitem);
+          divsegcol = $('<div class="ui-block-b">');
+          grid.append(divsegcol);
+          divprecoitem = $('<div data-role="fieldcontain">');
+          divsegcol.append(divprecoitem);
+          inputprecoitem = $('<input name="" id="textinput1" placeholder="" value="" type="number" data-mini="true">');
+          divprecoitem.append(inputprecoitem);
+          return inputprecoitem.change(function() {
+            return alert("PUT/" + item.id + ": " + inputprecoitem.val());
+          });
+        });
+      });
+      return this.content.trigger("create");
+    };
+
+    return PaginaDetalhesTabelaPreco;
+
+  })(App.PaginaDetalhes);
+
   App.ModuloTabelaPreco = (function(_super) {
 
     __extends(ModuloTabelaPreco, _super);
@@ -82,6 +120,10 @@
 
     ModuloTabelaPreco.prototype.criarPaginaCriacao = function() {
       return new App.FormCriacaoTabelaPreco(this);
+    };
+
+    ModuloTabelaPreco.prototype.criarPaginaDetalhes = function() {
+      return new App.PaginaDetalhesTabelaPreco(this);
     };
 
     return ModuloTabelaPreco;
