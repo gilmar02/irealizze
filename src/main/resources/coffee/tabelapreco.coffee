@@ -50,8 +50,8 @@ class App.FormCriacaoTabelaPreco extends App.PaginaCriacao
 
 
 class App.ModuloTabelaPreco extends App.Modulo
-  constructor: (@lista) ->
-    super(@lista, 'TabelaPreco', 'tabelasprecos', 'nome')
+  constructor: () ->
+    super('TabelaPreco', 'tabelasprecos', 'nome')
     
   criarPaginaEdicao: ->
     new App.FormEdicaoTabelaPreco(this)

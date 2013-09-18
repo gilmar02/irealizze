@@ -99,7 +99,7 @@
       PaginaListagem.__super__.constructor.call(this, this.modulo, this.idMae);
     }
 
-    PaginaListagem.prototype.desenharConteudo = function() {
+    PaginaListagem.prototype.desenharConteudo = function(linkGet) {
       var _this = this;
       this.content.empty();
       this.lista = $('<ul data-role="listview" data-divider-theme="b" data-inset="true">');
@@ -108,7 +108,7 @@
       this.desenharBotaoNovo();
       this.desenharBotaoVoltar();
       this.atualizar();
-      return $.getJSON(this.modulo.url, function(jsonObj) {
+      return $.getJSON(linkGet, function(jsonObj) {
         $.each(jsonObj, function(i, registro) {
           return _this.listar(registro);
         });
@@ -117,9 +117,10 @@
     };
 
     PaginaListagem.prototype.listar = function(registro) {
-      var editar, li, ver,
+      var editar, li, linha, ver,
         _this = this;
-      ver = $("<a href='#" + this.modulo.paginaDetalhes.getId() + ("' data-transition='slide'>" + registro[this.modulo.propriedade] + "</a>"));
+      linha = this.modulo.prepararLinhaListagem(registro);
+      ver = $("<a href='#" + this.modulo.paginaDetalhes.getId() + ("' data-transition='slide'>" + linha + "</a>"));
       editar = $("<a href='#" + this.modulo.paginaEdicao.getId() + "' data-transition='slide'>Editar</a>");
       li = $("<li data-theme='c' data-icon='edit'>");
       li.append(ver);
@@ -151,10 +152,9 @@
 
     __extends(PaginaDetalhes, _super);
 
-    function PaginaDetalhes(modulo, idMae) {
+    function PaginaDetalhes(modulo) {
       this.modulo = modulo;
-      this.idMae = idMae;
-      PaginaDetalhes.__super__.constructor.call(this, this.modulo, this.idMae);
+      PaginaDetalhes.__super__.constructor.call(this, this.modulo, this.modulo.paginaListagem.getId());
     }
 
     PaginaDetalhes.prototype.getId = function() {
@@ -310,31 +310,34 @@
 
   App.Modulo = (function() {
 
-    function Modulo(lista, nome, url, propriedade) {
-      this.lista = lista;
+    function Modulo(nome, url, propriedade) {
       this.nome = nome;
       this.url = url;
       this.propriedade = propriedade;
-      this.paginaListagem = new App.PaginaListagem(this, "principal");
+      this.paginaListagem = this.criarPaginaListagem();
       this.paginaEdicao = this.criarPaginaEdicao();
       this.paginaCriacao = this.criarPaginaCriacao();
       this.paginaDetalhes = this.criarPaginaDetalhes();
     }
 
+    Modulo.prototype.criarPaginaListagem = function() {
+      return new App.PaginaListagem(this, "principal");
+    };
+
     Modulo.prototype.criarPaginaEdicao = function() {
-      return new App.PaginaEdicao(this, this.paginaListagem.getId());
+      return new App.PaginaEdicao(this);
     };
 
     Modulo.prototype.criarPaginaCriacao = function() {
-      return new App.PaginaCriacao(this, this.paginaListagem.getId());
+      return new App.PaginaCriacao(this);
     };
 
     Modulo.prototype.criarPaginaDetalhes = function() {
-      return new App.PaginaDetalhes(this, this.paginaListagem.getId());
+      return new App.PaginaDetalhes(this);
     };
 
     Modulo.prototype.abrir = function() {
-      return this.paginaListagem.desenharConteudo();
+      return this.paginaListagem.desenharConteudo(this.url);
     };
 
     Modulo.prototype.novoItem = function() {
@@ -349,8 +352,41 @@
       return this.paginaEdicao.abrir(idItem, versionItem);
     };
 
+    Modulo.prototype.prepararLinhaListagem = function(registro) {
+      return registro[this.propriedade];
+    };
+
     return Modulo;
 
   })();
+
+  App.SubModulo = (function(_super) {
+
+    __extends(SubModulo, _super);
+
+    function SubModulo(nome, urlFilho, propriedade, moduloPai) {
+      this.nome = nome;
+      this.urlFilho = urlFilho;
+      this.propriedade = propriedade;
+      this.moduloPai = moduloPai;
+      SubModulo.__super__.constructor.call(this, this.nome, this.urlFilho, this.propriedade);
+    }
+
+    SubModulo.prototype.criarPaginaListagem = function() {
+      return new App.PaginaListagem(this, this.moduloPai.paginaDetalhes.getId());
+    };
+
+    SubModulo.prototype.abrir = function(idPai) {
+      var link;
+      if (idPai) {
+        this.idObjetoPai = idPai;
+      }
+      link = this.moduloPai.url + '/' + this.idObjetoPai + '/' + this.urlFilho;
+      return this.paginaListagem.desenharConteudo(link);
+    };
+
+    return SubModulo;
+
+  })(App.Modulo);
 
 }).call(this);

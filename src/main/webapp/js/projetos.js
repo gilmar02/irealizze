@@ -68,13 +68,43 @@
 
   })(App.PaginaCriacao);
 
+  App.PaginaDetalhesProjeto = (function(_super) {
+
+    __extends(PaginaDetalhesProjeto, _super);
+
+    function PaginaDetalhesProjeto(modulo) {
+      this.modulo = modulo;
+      PaginaDetalhesProjeto.__super__.constructor.call(this, this.modulo);
+    }
+
+    PaginaDetalhesProjeto.prototype.carregar = function(registro) {
+      var botaoElementos, botaoPeriodos,
+        _this = this;
+      this.titulo.html("" + registro[this.modulo.propriedade]);
+      botaoPeriodos = $('<a data-role="button" data-inline="true" href="#' + this.modulo.moduloPeriodo.paginaListagem.getId() + '" data-icon="create" data-iconpos="left">Períodos</a>');
+      this.content.append(botaoPeriodos);
+      botaoPeriodos.click(function() {
+        return _this.modulo.moduloPeriodo.abrir(registro.id);
+      });
+      botaoElementos = $('<a data-role="button" data-inline="true" href="#' + this.modulo.moduloElemento.paginaListagem.getId() + '" data-icon="create" data-iconpos="left">Elementos</a>');
+      this.content.append(botaoElementos);
+      return botaoElementos.click(function() {
+        return _this.modulo.moduloElemento.abrir(registro.id);
+      });
+    };
+
+    return PaginaDetalhesProjeto;
+
+  })(App.PaginaDetalhes);
+
   App.ModuloProjetos = (function(_super) {
 
     __extends(ModuloProjetos, _super);
 
-    function ModuloProjetos(lista) {
-      this.lista = lista;
-      ModuloProjetos.__super__.constructor.call(this, this.lista, 'Projetos', 'projetos', 'nome');
+    function ModuloProjetos() {
+      ModuloProjetos.__super__.constructor.call(this, 'Projetos', 'projetos', 'nome');
+      this.moduloPeriodo = new App.ModuloPeriodos(this);
+      this.moduloElemento = new App.ModuloElementos(this);
     }
 
     ModuloProjetos.prototype.criarPaginaEdicao = function() {
@@ -83,6 +113,10 @@
 
     ModuloProjetos.prototype.criarPaginaCriacao = function() {
       return new App.FormCriacaoProjeto(this);
+    };
+
+    ModuloProjetos.prototype.criarPaginaDetalhes = function() {
+      return new App.PaginaDetalhesProjeto(this);
     };
 
     return ModuloProjetos;

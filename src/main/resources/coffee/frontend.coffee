@@ -68,7 +68,7 @@ class App.PaginaListagem extends App.Pagina
   constructor: (@modulo, @idMae) ->
     super(@modulo, @idMae)
 
-  desenharConteudo: ->
+  desenharConteudo: (linkGet) ->
     @content.empty()
     @lista = $('<ul data-role="listview" data-divider-theme="b" data-inset="true">')
     @content.append @lista
@@ -77,13 +77,14 @@ class App.PaginaListagem extends App.Pagina
     @desenharBotaoNovo()
     @desenharBotaoVoltar()
     @atualizar()
-    $.getJSON @modulo.url, (jsonObj) =>
+    $.getJSON linkGet, (jsonObj) =>
       $.each jsonObj, (i, registro) =>
         @listar(registro)
       @lista.listview('refresh')
     
   listar: (registro) ->
-    ver = $("<a href='#" + @modulo.paginaDetalhes.getId() + "' data-transition='slide'>#{registro[@modulo.propriedade]}</a>")
+    linha = @modulo.prepararLinhaListagem(registro)
+    ver = $("<a href='#" + @modulo.paginaDetalhes.getId() + "' data-transition='slide'>#{linha}</a>")
     editar = $("<a href='#" + @modulo.paginaEdicao.getId() + "' data-transition='slide'>Editar</a>")
     li = $("<li data-theme='c' data-icon='edit'>")
     li.append ver
@@ -103,17 +104,17 @@ class App.PaginaListagem extends App.Pagina
 
 class App.PaginaDetalhes extends App.Pagina
 
-  constructor: (@modulo, @idMae) ->
-    super(@modulo, @idMae)
+  constructor: (@modulo) ->
+    super(@modulo, @modulo.paginaListagem.getId())
 
   getId: ->
     "detalhes" + @modulo.url
 
   abrir: (@idItem) ->
-    this.desenharConteudo()   
+    this.desenharConteudo()    
     $.getJSON @modulo.url + "/" + @idItem, (jsonObj) =>
-      @carregar(jsonObj)
-      @atualizar()
+      this.carregar(jsonObj)
+      this.atualizar()
 
   desenharConteudo: ->
     @content.empty()
@@ -124,7 +125,8 @@ class App.PaginaDetalhes extends App.Pagina
     @atualizar()
 
   carregar: (registro) ->
-    alert("1")
+    @titulo.html "#{@modulo.nome} #{registro[@modulo.propriedade]}"
+
 
 class App.PaginaEdicao extends App.Pagina
   constructor: (@modulo) ->
@@ -204,23 +206,26 @@ class App.PaginaCriacao extends App.Pagina
 
 class App.Modulo
 
-  constructor: (@lista, @nome, @url, @propriedade) ->
-    @paginaListagem = new App.PaginaListagem(this, "principal")
+  constructor: (@nome, @url, @propriedade) ->
+    @paginaListagem = @criarPaginaListagem()
     @paginaEdicao = @criarPaginaEdicao()
     @paginaCriacao = @criarPaginaCriacao()
     @paginaDetalhes = @criarPaginaDetalhes()
   
+  criarPaginaListagem: ->
+    new App.PaginaListagem(this, "principal")
+   
   criarPaginaEdicao: ->
-    new App.PaginaEdicao(this, @paginaListagem.getId())
+    new App.PaginaEdicao(this)
 
   criarPaginaCriacao: ->
-    new App.PaginaCriacao(this, @paginaListagem.getId())
+    new App.PaginaCriacao(this)
 
   criarPaginaDetalhes: ->
-    new App.PaginaDetalhes(this, @paginaListagem.getId())
+    new App.PaginaDetalhes(this)
     
   abrir: ->
-    @paginaListagem.desenharConteudo()
+    @paginaListagem.desenharConteudo(@url)
   
   novoItem: () ->
     @paginaCriacao.abrir()
@@ -230,4 +235,21 @@ class App.Modulo
   
   editarItem: (idItem, versionItem) ->
     @paginaEdicao.abrir(idItem, versionItem)
+    
+  prepararLinhaListagem: (registro) ->
+    registro[@propriedade]
 
+class App.SubModulo extends App.Modulo
+  constructor: (@nome, @urlFilho, @propriedade, @moduloPai) ->
+    super(@nome, @urlFilho, @propriedade)
+    
+  criarPaginaListagem: ->
+    new App.PaginaListagem(this, @moduloPai.paginaDetalhes.getId())
+  
+  abrir: (idPai) ->
+    if (idPai)
+      @idObjetoPai = idPai
+    
+    link = @moduloPai.url + '/' + @idObjetoPai + '/' + @urlFilho
+    @paginaListagem.desenharConteudo(link)
+  

@@ -47,15 +47,35 @@ class App.FormCriacaoProjeto extends App.PaginaCriacao
     "{ 'nome': '#{@inputNome.val()}', 'cliente': '#{@inputCliente.val()}' }"                
 
 
+class App.PaginaDetalhesProjeto extends App.PaginaDetalhes
+  constructor:(@modulo)->
+    super(@modulo)
+  
+  carregar: (registro) ->
+    @titulo.html "#{registro[@modulo.propriedade]}"
+    
+    botaoPeriodos = $('<a data-role="button" data-inline="true" href="#' + @modulo.moduloPeriodo.paginaListagem.getId() + '" data-icon="create" data-iconpos="left">Períodos</a>')
+    @content.append botaoPeriodos
+    botaoPeriodos.click =>
+      @modulo.moduloPeriodo.abrir(registro.id)
 
-
+    botaoElementos = $('<a data-role="button" data-inline="true" href="#' + @modulo.moduloElemento.paginaListagem.getId() + '" data-icon="create" data-iconpos="left">Elementos</a>')
+    @content.append botaoElementos
+    botaoElementos.click =>
+      @modulo.moduloElemento.abrir(registro.id)
+    
+    
 class App.ModuloProjetos extends App.Modulo
-  constructor: (@lista) ->
-    super(@lista, 'Projetos', 'projetos', 'nome')
+  constructor: () ->
+    super('Projetos', 'projetos', 'nome')
+    @moduloPeriodo = new App.ModuloPeriodos(this)
+    @moduloElemento = new App.ModuloElementos(this)
     
   criarPaginaEdicao: ->
     new App.FormEdicaoProjeto(this)
     
   criarPaginaCriacao: ->
     new App.FormCriacaoProjeto(this)
-  
+    
+  criarPaginaDetalhes: ->
+    new App.PaginaDetalhesProjeto(this)
